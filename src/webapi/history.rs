@@ -1,14 +1,13 @@
 use webcore::value::Reference;
 use webcore::try_from::TryInto;
-use webcore::serialization::JsSerializable;
+use webcore::serialization::JsSerialize;
+use private::TODO;
 
 /// [(JavaScript docs)](https://developer.mozilla.org/en-US/docs/Web/API/History)
+// https://html.spec.whatwg.org/#history-3
+#[derive(Clone, Debug, PartialEq, Eq, ReferenceType)]
+#[reference(instance_of = "History")]
 pub struct History(Reference);
-
-reference_boilerplate! {
-    History,
-    instanceof History
-}
 
 impl History {
     /// Adds a new entry to history.
@@ -33,7 +32,8 @@ impl History {
     /// This parameter is optional; if it isn't specified, it's set to the document's current URL.
     ///
     /// [(JavaScript docs)](https://developer.mozilla.org/en-US/docs/Web/API/History_API#The_pushState%28%29_method)
-    pub fn push_state<T: JsSerializable>(&self, state: T, title: &str, url: Option<&str>) {
+    // https://html.spec.whatwg.org/#the-history-interface:dom-history-pushstate
+    pub fn push_state<T: JsSerialize>(&self, state: T, title: &str, url: Option<&str>) {
         js!{ @(no_return)
             @{self}.pushState(@{state}, @{title}, @{url});
         };
@@ -44,10 +44,12 @@ impl History {
     /// a new entry in the global browser history.
     ///
     /// [(JavaScript docs)](https://developer.mozilla.org/en-US/docs/Web/API/History_API#The_replaceState%28%29_method)
-    pub fn replace_state<T: JsSerializable>(&self, state: T, title: &str, url: Option<&str>) {
+    // https://html.spec.whatwg.org/#the-history-interface:dom-history-replacestate
+    pub fn replace_state<T: JsSerialize>(&self, state: T, title: &str, url: Option<&str>) -> Result< (), TODO > {
         js!{ @(no_return)
             @{self}.replaceState(@{state}, @{title}, @{url});
         };
+        Ok(())
     }
 
     /// You can use the go() method to load a specific page from session history, identified by its
@@ -55,34 +57,41 @@ impl History {
     /// index 0).
     ///
     /// [(JavaScript docs)](https://developer.mozilla.org/en-US/docs/Web/API/History_API#Traveling_through_history)
-    pub fn go(&self, offset: i32) {
+    // https://html.spec.whatwg.org/#the-history-interface:dom-history-go
+    pub fn go(&self, offset: i32) -> Result< (), TODO > {
         js! { @(no_return)
             @{self}.go(@{offset});
         };
+        Ok(())
     }
 
     /// Move one step backward through history.
     ///
     /// [(JavaScript docs)](https://developer.mozilla.org/en-US/docs/Web/API/History_API#Traveling_through_history)
-    pub fn back(&self) {
+    // https://html.spec.whatwg.org/#the-history-interface:dom-history-back
+    pub fn back(&self) -> Result< (), TODO > {
         js! { @(no_return)
             @{self}.back();
         };
+        Ok(())
     }
 
     /// Move one step forward through history.
     ///
     /// [(JavaScript docs)](https://developer.mozilla.org/en-US/docs/Web/API/History_API#Traveling_through_history)
-    pub fn forward(&self) {
+    // https://html.spec.whatwg.org/#the-history-interface:dom-history-forward
+    pub fn forward(&self) -> Result< (), TODO > {
         js! { @(no_return)
             @{self}.forward();
         };
+        Ok(())
     }
 
     /// Returns the current number of history entries.
     ///
     /// [(JavaScript docs)](https://developer.mozilla.org/en-US/docs/Web/API/History)
-    pub fn len(&self) -> usize {
+    // https://html.spec.whatwg.org/#the-history-interface:dom-history-length
+    pub fn len(&self) -> u32 {
         js!(
             return @{self}.length;
         ).try_into().unwrap()
