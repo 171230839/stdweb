@@ -19,7 +19,10 @@ a high degree of interoperability between Rust and JavaScript.
 ## Patrons
 
 This software was brought to you thanks to these wonderful people:
-  * Ben Berman
+  * Eduard Knyshov
+  * Anselm Eickhoff
+  * Ferran Pujol Camins
+  * Johan Andersson
   * Stephen Sugden
 
 Thank you!
@@ -189,7 +192,165 @@ the native `wasm32-unknown-unknown` which doesn't need Emscripten
 [WebAssembly]: https://en.wikipedia.org/wiki/WebAssembly
 
 ## Changelog
-
+   * `stdweb 0.4.10`, `stdweb-derive 0.5.1`
+      * New methods:
+        * `IElement::insert_adjacent_html`
+        * `IElement::insert_html_before`
+        * `IElement::insert_html_after`
+        * `IElement::prepend_html`
+        * `IElement::append_html`
+        * `IElement::namespace_uri`
+        * `IElement::closest`
+        * `Document::create_element_ns`
+        * `Window::get_selection`
+      * New types:
+        * `AbortError`
+        * `SelectionType`
+        * `Selection`
+        * `Range`
+      * The error messages for failed type conversions are now improved
+      * The error type of failed conversions (when using `.try_into()`/`.try_from()`) is now convertible into a `TypeError`
+      * Aggregate error types (like, e.g. `DrawImageError`) are now serializable through the `js!` macro
+      * `TypeError` is now fixed (it was incorrectly treated as a `DOMException`)
+      * `Number` can now be converted into `f64` with `.into()`/`.from()`
+      * Added `Mut`, which is a new wrapper type for safely passing `FnMut` closures into the `js!` macro;
+        it is optional for now, however the usage of this wrapper type **will be mandatory** in the future!
+      * `FnMut` closures cannot be called recursively anymore
+      * `#[derive(ReferenceType)]` now supports a limited subset of generic types
+      * Asynchronous unit tests are now supported with a new `#[async_test]` attribute macro (nightly only)
+      * Updated to `futures 0.3` (nightly only)
+   * `stdweb 0.4.9`, `stdweb-derive 0.5.0`
+      * Performance improvements; serialization through serde is now twice as fast
+      * New events:
+        * `ScrollEvent`
+        * `DragRelatedEvent`
+        * `DragEvent`
+        * `DragStartEvent`
+        * `DragEndEvent`
+        * `DragEnterEvent`
+        * `DragLeaveEvent`
+        * `DragOverEvent`
+        * `DragExitEvent`
+        * `DragDropEvent`
+      * New types:
+        * `DataTransfer`
+        * `EffectAllowed`
+        * `DropEffect`
+        * `DataTransferItemList`
+        * `DataTransferItem`
+        * `DataTransferItemKind`
+        * `IDragEvent`
+      * `Value`s can now be converted to `Option< Serde< T > >` with `try_into`
+      * Deserialization of numbers through serde now works in the majority of cases
+        allowing types other than `i32` and `f64` to be used
+      * All of the events are now more strongly-typed
+          * Previously in was possible to deserialize e.g. a `keyup` event
+            as a `KeyDownEvent` since only the event's JS type was checked
+            and both `keyup` and `keydown` share the same JS type (`KeyboardEvent`).
+            From now on the `type` field of the event is also checked, so
+            such conversions are not allowed anymore.
+   * `0.4.8`
+      * Fixed compilation on the newest nightly when targeting `wasm32-unknown-unknown`
+      * New events:
+        * `PointerLockChangeEvent`
+        * `PointerLockErrorEvent`
+        * `MouseWheelEvent`
+      * New types:
+        * `MouseWheelDeltaMode`
+        * `XhrResponseType`
+      * New methods:
+        * `XmlHttpRequest::raw_response`
+        * `Window::device_pixel_ratio`
+        * `Document::pointer_lock_element`
+        * `Document::exit_pointer_lock`
+   * `0.4.7`
+      * New events:
+         * `AuxClickEvent`
+         * `MouseEnterEvent`
+         * `MouseLeaveEvent`
+         * `ContextMenuEvent`
+         * `SelectionChangeEvent`
+      * New types:
+        * `FileList`
+        * `FileReaderReadyState`
+      * Implement gamepad APIs:
+         * `Gamepad`
+         * `GamepadButton`
+         * `GamepadButtonMapping`
+         * `GamepadEvent`
+      * Fixed `CanvasRenderingContext2d::clear_rect`
+      * Fixed a leak when creating `TypedArray`s from
+        `Vec`s and `ArrayBuffer`s.
+   * `0.4.6`
+      * Fix `docs.rs` again
+      * New types:
+         * `SubmitEvent`
+         * `IChildNode`
+      * Fix `CanvasElement::to_data_url`
+   * `0.4.5`
+      * New types:
+         * `DocumentFragment`
+         * `SelectElement`
+         * `OptionElement`
+         * `HtmlCollection`
+      * New methods:
+         * `Node::from_html`
+         * `Value::is_null`
+      * Expose enums:
+         * `SocketMessageData`
+         * `NodeType`
+      * Update to `futures` 0.2
+   * `0.4.4`
+      * Fix `docs.rs` (hopefully).
+      * New methods:
+         * `Location::origin`
+         * `Location::protocol`
+         * `Location::host`
+         * `Location::hostname`
+         * `Location::port`
+         * `Location::pathname`
+         * `Location::search`
+      * These now return `SecurityError` in the error case:
+         * `Location::hash`
+         * `Location::href`
+   * `0.4.3`
+      * Objects which cannot be used as keys in a `WeakMap`
+        should be supported now (e.g. some of the WebGL-related objects under Firefox)
+      * New methods:
+         * `Element::get_bounding_client_rect`
+         * `Element::scroll_top`
+         * `Element::scroll_left`
+         * `Window::page_x_offset`
+         * `Window::page_y_offset`
+         * `NodeList::item`
+         * `Document::body`
+         * `Document::head`
+         * `Document::title`
+         * `Document::set_title`
+         * `IMouseEvent::offset_x`
+         * `IMouseEvent::offset_y`
+      * Expose more canvas related types:
+         * `CompositeOperation`
+         * `LineCap`
+         * `LineJoin`
+         * `Repetition`
+         * `TextAlign`
+         * `TextBaseline`
+      * Expose canvas related error types: `AddColorStopError`, `DrawImageError`, `GetImageDataError`
+      * New events:
+         * `MouseOverEvent`
+         * `MouseOutEvent`
+         * `PointerOverEvent`
+         * `PointerEnterEvent`
+         * `PointerDownEvent`
+         * `PointerMoveEvent`
+         * `PointerUpEvent`
+         * `PointerCancelEvent`
+         * `PointerOutEvent`
+         * `PointerLeaveEvent`
+         * `GotPointerCaptureEvent`
+         * `LostPointerCaptureEvent`
+      * New interface for pointer events: `IPointerEvent`
    * `0.4.2`
       * Fixed a leak when deserializing references
       * Fixed `CanvasRenderingContext2d::get_canvas`

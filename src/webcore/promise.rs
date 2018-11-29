@@ -1,21 +1,30 @@
 use std;
+use std::fmt;
+use std::marker::PhantomData;
+
 use discard::Discard;
 use webcore::once::Once;
 use webcore::value::{Value, Reference};
 use webcore::try_from::{TryInto, TryFrom};
 use webcore::discard::DiscardOnDrop;
 
-#[cfg(feature = "futures")]
+#[cfg(feature = "futures-support")]
 use webcore::serialization::JsSerialize;
 
-#[cfg(feature = "futures")]
-use futures::unsync::oneshot::channel;
+#[cfg(feature = "futures-support")]
+use futures_core::TryFuture;
 
-#[cfg(feature = "futures")]
-use futures::future::Future;
+#[cfg(feature = "futures-support")]
+use futures_util::{FutureExt, TryFutureExt};
 
-#[cfg(feature = "futures")]
-use super::promise_future::PromiseFuture;
+#[cfg(feature = "futures-support")]
+use futures_util::future::ready;
+
+#[cfg(feature = "futures-support")]
+use futures_channel::oneshot::channel;
+
+#[cfg(feature = "futures-support")]
+use super::promise_future::{PromiseFuture, spawn_local};
 
 
 /// This is used to cleanup the [`done`](struct.Promise.html#method.done) callback.
@@ -102,9 +111,7 @@ impl Promise {
     ///
     /// If you simply want to use a JavaScript Promise inside Rust, then you
     /// don't need to use this function: you should use
-    /// [`PromiseFuture`](struct.PromiseFuture.html) and the
-    /// [`Future`](https://docs.rs/futures/0.1.*/futures/future/trait.Future.html)
-    /// methods instead.
+    /// [`PromiseFuture`](struct.PromiseFuture.html) instead.
     ///
     /// # Examples
     ///
@@ -126,11 +133,13 @@ impl Promise {
     ///
     /// [(JavaScript docs)](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise#Syntax)
     // https://www.ecma-international.org/ecma-262/6.0/#sec-promise-executor
-    #[cfg(feature = "futures")]
+    #[cfg(feature = "futures-support")]
     pub fn from_future< A >( future: A ) -> Self
-        where A: Future + 'static,
-              A::Item: JsSerialize,
+        where A: TryFuture + 'static,
+              A::Ok: JsSerialize,
               A::Error: JsSerialize {
+
+        let future = future.into_future();
 
         #[inline]
         fn call< A: JsSerialize >( f: Reference, value: A ) {
@@ -138,13 +147,14 @@ impl Promise {
         }
 
         let callback = move |success: Reference, error: Reference| {
-            PromiseFuture::spawn(
+            spawn_local(
                 future.then( move |result| {
                     match result {
                         Ok( a ) => call( success, a ),
                         Err( a ) => call( error, a ),
                     }
-                    Ok( () )
+
+                    ready( () )
                 } )
             );
         };
@@ -257,9 +267,11 @@ impl Promise {
         } )
     }
 
-    /// This method should rarely be needed, instead use [`value.try_into()`](unstable/trait.TryInto.html) to convert directly from a [`Value`](enum.Value.html) into a [`PromiseFuture`](struct.PromiseFuture.html).
+    /// This method converts the `Promise` into a [`PromiseFuture`](struct.PromiseFuture.html), so that it can be used as a Rust
+    /// [`Future`](https://rust-lang-nursery.github.io/futures-api-docs/0.3.0-alpha.5/futures/future/trait.Future.html).
     ///
-    /// This method converts the `Promise` into a [`PromiseFuture`](struct.PromiseFuture.html), so that it can be used as a Rust [`Future`](https://docs.rs/futures/0.1.*/futures/future/trait.Future.html).
+    /// This method should rarely be needed, instead use [`value.try_into()`](unstable/trait.TryInto.html) to convert directly
+    /// from a [`Value`](enum.Value.html) into a [`PromiseFuture`](struct.PromiseFuture.html).
     ///
     /// # Examples
     ///
@@ -268,7 +280,7 @@ impl Promise {
     /// ```
     // We can't use the IntoFuture trait because Promise doesn't have a type argument
     // TODO explain more why we can't use the IntoFuture trait
-    #[cfg(feature = "futures")]
+    #[cfg(feature = "futures-support")]
     pub fn to_future< A, B >( &self ) -> PromiseFuture< A, B >
          where A: TryFrom< Value > + 'static,
                B: TryFrom< Value > + 'static,
@@ -288,5 +300,36 @@ impl Promise {
                 };
             } ),
         }
+    }
+}
+
+/// A statically typed `Promise`.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct TypedPromise< T, E >( Promise, PhantomData< (T, E) > );
+
+impl< T, E > TypedPromise< T, E >
+    where T: TryFrom< Value >,
+          E: TryFrom< Value >
+{
+    #[inline]
+    pub(crate) fn new( promise: Promise ) -> Self {
+        TypedPromise( promise, PhantomData )
+    }
+
+    /// A strongly typed version of [`Promise.done`](struct.Promise.html#method.done).
+    #[inline]
+    pub fn done< F >( &self, callback: F ) -> DiscardOnDrop< DoneHandle >
+        where F: FnOnce( Result< T, E > ) + 'static,
+              T::Error: fmt::Debug,
+              E::Error: fmt::Debug
+    {
+        self.0.done( move |result| callback( result ) )
+    }
+}
+
+impl< T, E > From< TypedPromise< T, E > > for Promise {
+    #[inline]
+    fn from( promise: TypedPromise< T, E > ) -> Promise {
+        promise.0
     }
 }

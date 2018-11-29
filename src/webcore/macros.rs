@@ -1,3 +1,6 @@
+use webcore::try_from::TryInto;
+use webcore::value::Value;
+
 macro_rules! next {
     (empty) => {};
 
@@ -56,7 +59,7 @@ macro_rules! __js_raw_asm {
     // args, params = [], []
     // 1.upto( 17 ) do |nth|
     //     args << "$a#{nth}:expr"
-    //     params << "$a#{nth} as i32"
+    //     params << "$a#{nth} as *const u8"
     //     puts "($code:expr, #{args.join ', '}) => {{"
     //     puts "    #[allow(unused_unsafe)]"
     //     puts "    unsafe {"
@@ -69,119 +72,119 @@ macro_rules! __js_raw_asm {
         #[allow(unused_unsafe)]
         unsafe {
             #[allow(trivial_numeric_casts)]
-            $crate::private::__js_1( $a1 as i32, concat!( $code, "\0" ) as *const _ as *const u8 )
+            $crate::private::__js_1( $a1 as *const u8, concat!( $code, "\0" ) as *const _ as *const u8 )
         }
     }};
     ($code:expr, $a1:expr, $a2:expr) => {{
         #[allow(unused_unsafe)]
         unsafe {
             #[allow(trivial_numeric_casts)]
-            $crate::private::__js_2( $a1 as i32, $a2 as i32, concat!( $code, "\0" ) as *const _ as *const u8 )
+            $crate::private::__js_2( $a1 as *const u8, $a2 as *const u8, concat!( $code, "\0" ) as *const _ as *const u8 )
         }
     }};
     ($code:expr, $a1:expr, $a2:expr, $a3:expr) => {{
         #[allow(unused_unsafe)]
         unsafe {
             #[allow(trivial_numeric_casts)]
-            $crate::private::__js_3( $a1 as i32, $a2 as i32, $a3 as i32, concat!( $code, "\0" ) as *const _ as *const u8 )
+            $crate::private::__js_3( $a1 as *const u8, $a2 as *const u8, $a3 as *const u8, concat!( $code, "\0" ) as *const _ as *const u8 )
         }
     }};
     ($code:expr, $a1:expr, $a2:expr, $a3:expr, $a4:expr) => {{
         #[allow(unused_unsafe)]
         unsafe {
             #[allow(trivial_numeric_casts)]
-            $crate::private::__js_4( $a1 as i32, $a2 as i32, $a3 as i32, $a4 as i32, concat!( $code, "\0" ) as *const _ as *const u8 )
+            $crate::private::__js_4( $a1 as *const u8, $a2 as *const u8, $a3 as *const u8, $a4 as *const u8, concat!( $code, "\0" ) as *const _ as *const u8 )
         }
     }};
     ($code:expr, $a1:expr, $a2:expr, $a3:expr, $a4:expr, $a5:expr) => {{
         #[allow(unused_unsafe)]
         unsafe {
             #[allow(trivial_numeric_casts)]
-            $crate::private::__js_5( $a1 as i32, $a2 as i32, $a3 as i32, $a4 as i32, $a5 as i32, concat!( $code, "\0" ) as *const _ as *const u8 )
+            $crate::private::__js_5( $a1 as *const u8, $a2 as *const u8, $a3 as *const u8, $a4 as *const u8, $a5 as *const u8, concat!( $code, "\0" ) as *const _ as *const u8 )
         }
     }};
     ($code:expr, $a1:expr, $a2:expr, $a3:expr, $a4:expr, $a5:expr, $a6:expr) => {{
         #[allow(unused_unsafe)]
         unsafe {
             #[allow(trivial_numeric_casts)]
-            $crate::private::__js_6( $a1 as i32, $a2 as i32, $a3 as i32, $a4 as i32, $a5 as i32, $a6 as i32, concat!( $code, "\0" ) as *const _ as *const u8 )
+            $crate::private::__js_6( $a1 as *const u8, $a2 as *const u8, $a3 as *const u8, $a4 as *const u8, $a5 as *const u8, $a6 as *const u8, concat!( $code, "\0" ) as *const _ as *const u8 )
         }
     }};
     ($code:expr, $a1:expr, $a2:expr, $a3:expr, $a4:expr, $a5:expr, $a6:expr, $a7:expr) => {{
         #[allow(unused_unsafe)]
         unsafe {
             #[allow(trivial_numeric_casts)]
-            $crate::private::__js_7( $a1 as i32, $a2 as i32, $a3 as i32, $a4 as i32, $a5 as i32, $a6 as i32, $a7 as i32, concat!( $code, "\0" ) as *const _ as *const u8 )
+            $crate::private::__js_7( $a1 as *const u8, $a2 as *const u8, $a3 as *const u8, $a4 as *const u8, $a5 as *const u8, $a6 as *const u8, $a7 as *const u8, concat!( $code, "\0" ) as *const _ as *const u8 )
         }
     }};
     ($code:expr, $a1:expr, $a2:expr, $a3:expr, $a4:expr, $a5:expr, $a6:expr, $a7:expr, $a8:expr) => {{
         #[allow(unused_unsafe)]
         unsafe {
             #[allow(trivial_numeric_casts)]
-            $crate::private::__js_8( $a1 as i32, $a2 as i32, $a3 as i32, $a4 as i32, $a5 as i32, $a6 as i32, $a7 as i32, $a8 as i32, concat!( $code, "\0" ) as *const _ as *const u8 )
+            $crate::private::__js_8( $a1 as *const u8, $a2 as *const u8, $a3 as *const u8, $a4 as *const u8, $a5 as *const u8, $a6 as *const u8, $a7 as *const u8, $a8 as *const u8, concat!( $code, "\0" ) as *const _ as *const u8 )
         }
     }};
     ($code:expr, $a1:expr, $a2:expr, $a3:expr, $a4:expr, $a5:expr, $a6:expr, $a7:expr, $a8:expr, $a9:expr) => {{
         #[allow(unused_unsafe)]
         unsafe {
             #[allow(trivial_numeric_casts)]
-            $crate::private::__js_9( $a1 as i32, $a2 as i32, $a3 as i32, $a4 as i32, $a5 as i32, $a6 as i32, $a7 as i32, $a8 as i32, $a9 as i32, concat!( $code, "\0" ) as *const _ as *const u8 )
+            $crate::private::__js_9( $a1 as *const u8, $a2 as *const u8, $a3 as *const u8, $a4 as *const u8, $a5 as *const u8, $a6 as *const u8, $a7 as *const u8, $a8 as *const u8, $a9 as *const u8, concat!( $code, "\0" ) as *const _ as *const u8 )
         }
     }};
     ($code:expr, $a1:expr, $a2:expr, $a3:expr, $a4:expr, $a5:expr, $a6:expr, $a7:expr, $a8:expr, $a9:expr, $a10:expr) => {{
         #[allow(unused_unsafe)]
         unsafe {
             #[allow(trivial_numeric_casts)]
-            $crate::private::__js_10( $a1 as i32, $a2 as i32, $a3 as i32, $a4 as i32, $a5 as i32, $a6 as i32, $a7 as i32, $a8 as i32, $a9 as i32, $a10 as i32, concat!( $code, "\0" ) as *const _ as *const u8 )
+            $crate::private::__js_10( $a1 as *const u8, $a2 as *const u8, $a3 as *const u8, $a4 as *const u8, $a5 as *const u8, $a6 as *const u8, $a7 as *const u8, $a8 as *const u8, $a9 as *const u8, $a10 as *const u8, concat!( $code, "\0" ) as *const _ as *const u8 )
         }
     }};
     ($code:expr, $a1:expr, $a2:expr, $a3:expr, $a4:expr, $a5:expr, $a6:expr, $a7:expr, $a8:expr, $a9:expr, $a10:expr, $a11:expr) => {{
         #[allow(unused_unsafe)]
         unsafe {
             #[allow(trivial_numeric_casts)]
-            $crate::private::__js_11( $a1 as i32, $a2 as i32, $a3 as i32, $a4 as i32, $a5 as i32, $a6 as i32, $a7 as i32, $a8 as i32, $a9 as i32, $a10 as i32, $a11 as i32, concat!( $code, "\0" ) as *const _ as *const u8 )
+            $crate::private::__js_11( $a1 as *const u8, $a2 as *const u8, $a3 as *const u8, $a4 as *const u8, $a5 as *const u8, $a6 as *const u8, $a7 as *const u8, $a8 as *const u8, $a9 as *const u8, $a10 as *const u8, $a11 as *const u8, concat!( $code, "\0" ) as *const _ as *const u8 )
         }
     }};
     ($code:expr, $a1:expr, $a2:expr, $a3:expr, $a4:expr, $a5:expr, $a6:expr, $a7:expr, $a8:expr, $a9:expr, $a10:expr, $a11:expr, $a12:expr) => {{
         #[allow(unused_unsafe)]
         unsafe {
             #[allow(trivial_numeric_casts)]
-            $crate::private::__js_12( $a1 as i32, $a2 as i32, $a3 as i32, $a4 as i32, $a5 as i32, $a6 as i32, $a7 as i32, $a8 as i32, $a9 as i32, $a10 as i32, $a11 as i32, $a12 as i32, concat!( $code, "\0" ) as *const _ as *const u8 )
+            $crate::private::__js_12( $a1 as *const u8, $a2 as *const u8, $a3 as *const u8, $a4 as *const u8, $a5 as *const u8, $a6 as *const u8, $a7 as *const u8, $a8 as *const u8, $a9 as *const u8, $a10 as *const u8, $a11 as *const u8, $a12 as *const u8, concat!( $code, "\0" ) as *const _ as *const u8 )
         }
     }};
     ($code:expr, $a1:expr, $a2:expr, $a3:expr, $a4:expr, $a5:expr, $a6:expr, $a7:expr, $a8:expr, $a9:expr, $a10:expr, $a11:expr, $a12:expr, $a13:expr) => {{
         #[allow(unused_unsafe)]
         unsafe {
             #[allow(trivial_numeric_casts)]
-            $crate::private::__js_13( $a1 as i32, $a2 as i32, $a3 as i32, $a4 as i32, $a5 as i32, $a6 as i32, $a7 as i32, $a8 as i32, $a9 as i32, $a10 as i32, $a11 as i32, $a12 as i32, $a13 as i32, concat!( $code, "\0" ) as *const _ as *const u8 )
+            $crate::private::__js_13( $a1 as *const u8, $a2 as *const u8, $a3 as *const u8, $a4 as *const u8, $a5 as *const u8, $a6 as *const u8, $a7 as *const u8, $a8 as *const u8, $a9 as *const u8, $a10 as *const u8, $a11 as *const u8, $a12 as *const u8, $a13 as *const u8, concat!( $code, "\0" ) as *const _ as *const u8 )
         }
     }};
     ($code:expr, $a1:expr, $a2:expr, $a3:expr, $a4:expr, $a5:expr, $a6:expr, $a7:expr, $a8:expr, $a9:expr, $a10:expr, $a11:expr, $a12:expr, $a13:expr, $a14:expr) => {{
         #[allow(unused_unsafe)]
         unsafe {
             #[allow(trivial_numeric_casts)]
-            $crate::private::__js_14( $a1 as i32, $a2 as i32, $a3 as i32, $a4 as i32, $a5 as i32, $a6 as i32, $a7 as i32, $a8 as i32, $a9 as i32, $a10 as i32, $a11 as i32, $a12 as i32, $a13 as i32, $a14 as i32, concat!( $code, "\0" ) as *const _ as *const u8 )
+            $crate::private::__js_14( $a1 as *const u8, $a2 as *const u8, $a3 as *const u8, $a4 as *const u8, $a5 as *const u8, $a6 as *const u8, $a7 as *const u8, $a8 as *const u8, $a9 as *const u8, $a10 as *const u8, $a11 as *const u8, $a12 as *const u8, $a13 as *const u8, $a14 as *const u8, concat!( $code, "\0" ) as *const _ as *const u8 )
         }
     }};
     ($code:expr, $a1:expr, $a2:expr, $a3:expr, $a4:expr, $a5:expr, $a6:expr, $a7:expr, $a8:expr, $a9:expr, $a10:expr, $a11:expr, $a12:expr, $a13:expr, $a14:expr, $a15:expr) => {{
         #[allow(unused_unsafe)]
         unsafe {
             #[allow(trivial_numeric_casts)]
-            $crate::private::__js_15( $a1 as i32, $a2 as i32, $a3 as i32, $a4 as i32, $a5 as i32, $a6 as i32, $a7 as i32, $a8 as i32, $a9 as i32, $a10 as i32, $a11 as i32, $a12 as i32, $a13 as i32, $a14 as i32, $a15 as i32, concat!( $code, "\0" ) as *const _ as *const u8 )
+            $crate::private::__js_15( $a1 as *const u8, $a2 as *const u8, $a3 as *const u8, $a4 as *const u8, $a5 as *const u8, $a6 as *const u8, $a7 as *const u8, $a8 as *const u8, $a9 as *const u8, $a10 as *const u8, $a11 as *const u8, $a12 as *const u8, $a13 as *const u8, $a14 as *const u8, $a15 as *const u8, concat!( $code, "\0" ) as *const _ as *const u8 )
         }
     }};
     ($code:expr, $a1:expr, $a2:expr, $a3:expr, $a4:expr, $a5:expr, $a6:expr, $a7:expr, $a8:expr, $a9:expr, $a10:expr, $a11:expr, $a12:expr, $a13:expr, $a14:expr, $a15:expr, $a16:expr) => {{
         #[allow(unused_unsafe)]
         unsafe {
             #[allow(trivial_numeric_casts)]
-            $crate::private::__js_16( $a1 as i32, $a2 as i32, $a3 as i32, $a4 as i32, $a5 as i32, $a6 as i32, $a7 as i32, $a8 as i32, $a9 as i32, $a10 as i32, $a11 as i32, $a12 as i32, $a13 as i32, $a14 as i32, $a15 as i32, $a16 as i32, concat!( $code, "\0" ) as *const _ as *const u8 )
+            $crate::private::__js_16( $a1 as *const u8, $a2 as *const u8, $a3 as *const u8, $a4 as *const u8, $a5 as *const u8, $a6 as *const u8, $a7 as *const u8, $a8 as *const u8, $a9 as *const u8, $a10 as *const u8, $a11 as *const u8, $a12 as *const u8, $a13 as *const u8, $a14 as *const u8, $a15 as *const u8, $a16 as *const u8, concat!( $code, "\0" ) as *const _ as *const u8 )
         }
     }};
     ($code:expr, $a1:expr, $a2:expr, $a3:expr, $a4:expr, $a5:expr, $a6:expr, $a7:expr, $a8:expr, $a9:expr, $a10:expr, $a11:expr, $a12:expr, $a13:expr, $a14:expr, $a15:expr, $a16:expr, $a17:expr) => {{
         #[allow(unused_unsafe)]
         unsafe {
             #[allow(trivial_numeric_casts)]
-            $crate::private::__js_17( $a1 as i32, $a2 as i32, $a3 as i32, $a4 as i32, $a5 as i32, $a6 as i32, $a7 as i32, $a8 as i32, $a9 as i32, $a10 as i32, $a11 as i32, $a12 as i32, $a13 as i32, $a14 as i32, $a15 as i32, $a16 as i32, $a17 as i32, concat!( $code, "\0" ) as *const _ as *const u8 )
+            $crate::private::__js_17( $a1 as *const u8, $a2 as *const u8, $a3 as *const u8, $a4 as *const u8, $a5 as *const u8, $a6 as *const u8, $a7 as *const u8, $a8 as *const u8, $a9 as *const u8, $a10 as *const u8, $a11 as *const u8, $a12 as *const u8, $a13 as *const u8, $a14 as *const u8, $a15 as *const u8, $a16 as *const u8, $a17 as *const u8, concat!( $code, "\0" ) as *const _ as *const u8 )
         }
     }};
 
@@ -295,20 +298,14 @@ macro_rules! _js_impl {
         _js_impl!( @if $condition in [$($rest)*] {$($true_case)*} else {$($false_case)*} );
     };
 
-    (@prepare $memory_required:ident [] [$($names:tt)*]) => {};
-    (@prepare $memory_required:ident [$arg:tt $($rest_args:tt)*] [$name:tt $($rest_names:tt)*]) => {
+    (@serialize [] [$($names:tt)*]) => {};
+    (@serialize [$arg:tt $($rest_args:tt)*] [$name:tt $($rest_names:tt)*]) => {
         let $name = $arg;
         let $name = $crate::private::IntoNewtype::into_newtype( $name );
-        $memory_required += $crate::private::JsSerializeOwned::memory_required_owned( &$name );
-        _js_impl!( @prepare $memory_required [$($rest_args)*] [$($rest_names)*] );
-    };
-
-    (@serialize $arena:ident [] [$($names:tt)*]) => {};
-    (@serialize $arena:ident [$arg:tt $($rest_args:tt)*] [$name:tt $($rest_names:tt)*]) => {
         let mut $name = Some( $name );
-        let $name = $crate::private::JsSerializeOwned::into_js_owned( &mut $name, &$arena );
+        let $name = $crate::private::JsSerializeOwned::into_js_owned( &mut $name );
         let $name = &$name as *const _;
-        _js_impl!( @serialize $arena [$($rest_args)*] [$($rest_names)*] );
+        _js_impl!( @serialize [$($rest_args)*] [$($rest_names)*] );
     };
 
     (@call_emscripten [$code:expr] [] [$($arg_names:tt)*]) => {
@@ -387,19 +384,11 @@ macro_rules! _js_impl {
                 $crate::initialize();
             }
 
-            let mut memory_required = 0;
-            _js_impl!( @prepare memory_required [$($args)*] [a0 a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15] );
-
-            #[allow(unused_variables)]
-            let arena = $crate::private::PreallocatedArena::new( memory_required );
-
-            _js_impl!( @serialize arena [$($args)*] [a0 a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15] );
-            arena.assert_no_free_space_left();
-
-            $crate::private::noop( &mut memory_required );
+            let restore_point = $crate::private::ArenaRestorePoint::new();
+            _js_impl!( @serialize [$($args)*] [a0 a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15] );
 
             #[allow(unused_unsafe, unused_parens)]
-            unsafe {
+            let result = unsafe {
                 _js_impl!(
                     @if no_return in [$($flags)*] {
                         _js_impl!(
@@ -422,7 +411,10 @@ macro_rules! _js_impl {
                         result.deserialize()
                     }}
                 )
-            }
+            };
+
+            ::std::mem::drop( restore_point );
+            result
         }
     };
 
@@ -464,6 +456,8 @@ macro_rules! _js_impl {
 ///
 /// # Examples
 ///
+/// ## Regular Usage
+///
 /// ```
 /// let name = "Bob";
 /// let result = js! {
@@ -472,6 +466,20 @@ macro_rules! _js_impl {
 /// };
 ///
 /// println!( "2 + 2 = {:?}", result );
+/// ```
+///
+/// Note: you **must** include the `return ...;` statement to get a value.
+///
+/// ## No Return
+///
+/// If you don't need to return a value from your snippet you can add a @(no_return) attribute to
+/// slightly improve performance.
+///
+/// ```
+/// let name = "Bob";
+/// js! { @(no_return)
+///     console.log( "Hello " + @{name} + "!" );
+/// };
 /// ```
 #[macro_export]
 macro_rules! js {
@@ -502,25 +510,15 @@ macro_rules! __js_serializable_boilerplate {
     (($($impl_arg:tt)*) ($($kind_arg:tt)*) ($($bounds:tt)*)) => {
         impl< $($impl_arg)* > $crate::private::JsSerializeOwned for $($kind_arg)* where $($bounds)* {
             #[inline]
-            fn into_js_owned< '_a >( value: &'_a mut Option< Self >, arena: &'_a $crate::private::PreallocatedArena ) -> $crate::private::SerializedValue< '_a > {
-                $crate::private::JsSerialize::_into_js( value.as_ref().unwrap(), arena )
-            }
-
-            #[inline]
-            fn memory_required_owned( &self ) -> usize {
-                $crate::private::JsSerialize::_memory_required( self )
+            fn into_js_owned< '_a >( value: &'_a mut Option< Self > ) -> $crate::private::SerializedValue< '_a > {
+                $crate::private::JsSerialize::_into_js( value.as_ref().unwrap() )
             }
         }
 
         impl< '_r, $($impl_arg)* > $crate::private::JsSerializeOwned for &'_r $($kind_arg)* where $($bounds)* {
             #[inline]
-            fn into_js_owned< '_a >( value: &'_a mut Option< Self >, arena: &'_a $crate::private::PreallocatedArena ) -> $crate::private::SerializedValue< '_a > {
-                $crate::private::JsSerialize::_into_js( value.unwrap(), arena )
-            }
-
-            #[inline]
-            fn memory_required_owned( &self ) -> usize {
-                $crate::private::JsSerialize::_memory_required( *self )
+            fn into_js_owned< '_a >( value: &'_a mut Option< Self > ) -> $crate::private::SerializedValue< '_a > {
+                $crate::private::JsSerialize::_into_js( value.unwrap() )
             }
         }
     };
@@ -541,7 +539,7 @@ macro_rules! error_boilerplate {
         }
     };
 
-    ($type_name:ident, name = $error_name:expr) => {
+    ($type_name:ident, dom_exception = $error_name:expr) => {
         impl ::InstanceOf for $type_name {
             #[inline]
             fn instance_of( reference: &Reference ) -> bool {
@@ -593,6 +591,19 @@ macro_rules! newtype_enum {
                 }
             }
         }
+    }
+}
+
+// This helps with type inference and converts the outer error
+// type when the `TryInto`'s error type in the `js_try!`'s
+// success and error cases differ.
+#[inline]
+pub fn js_try_convert< T, E, P >( value: Value ) -> Result< Result< T, E >, P >
+    where Value: TryInto< T >, <Value as TryInto< T >>::Error: Into< P >
+{
+    match value.try_into() {
+        Ok( value ) => Ok( Ok( value ) ),
+        Err( error ) => Err( error.into() )
     }
 }
 
@@ -654,10 +665,7 @@ macro_rules! js_try {
 
         use webcore::try_from::TryInto;
         if js!( return @{result.as_ref()}.success; ) == true {
-            match js!( return @{result}.value; ).try_into() {
-                Ok(t) => Ok(Ok(t)),
-                Err(e) => Err(e),
-            }
+            ::webcore::macros::js_try_convert( js!( return @{result}.value; ) )
         } else {
             match js!( return @{result}.error; ).try_into() {
                 Ok(e) => Ok(Err(e)),
@@ -665,6 +673,28 @@ macro_rules! js_try {
             }
         }
     }};
+}
+
+macro_rules! comma_join {
+    ($a:ident) => {
+        stringify!( $a )
+    };
+
+    ($a:ident $b:ident) => {
+        concat!(
+            stringify!( $a ),
+            " or ",
+            stringify!( $b ),
+        )
+    };
+
+    ($a:ident $($item:ident)+) => {
+        concat!(
+            stringify!( $a ),
+            ", ",
+            comma_join!( $($item)+ )
+        )
+    };
 }
 
 macro_rules! error_enum_boilerplate {
@@ -688,7 +718,8 @@ macro_rules! error_enum_boilerplate {
                     }
                 )*
 
-                Err(::webcore::value::ConversionError::type_mismatch( &value ))
+                let expected = comma_join!( $($variant)+ ).into();
+                Err( ::webcore::value::ConversionError::type_mismatch( &value, expected ) )
             }
         }
 
@@ -705,11 +736,27 @@ macro_rules! error_enum_boilerplate {
                 stringify!($error_name)
             }
         }
+
+        impl ::webcore::serialization::JsSerialize for $error_name {
+            #[doc(hidden)]
+            #[inline]
+            fn _into_js< 'a >( &'a self ) -> ::webcore::serialization::SerializedValue< 'a > {
+                let reference: &::webcore::value::Reference = match self {
+                    $(
+                        &$error_name::$variant( ref variant ) => variant.as_ref(),
+                    )+
+                };
+
+                reference._into_js()
+            }
+        }
     }
 }
 
 #[cfg(test)]
 mod tests {
+    use webcore::value::Value;
+
     macro_rules! stringify_js {
         ($($token:tt)*) => {
             _js_impl!( @stringify [] -> $($token)* )
@@ -746,8 +793,6 @@ mod tests {
 
     #[test]
     fn js_try() {
-        use ::webcore::value::{ConversionError, Value};
-
         let v: Result<Value, Value> = js_try!( return "test"; ).unwrap();
         assert_eq!( v, Ok(Value::String("test".to_string())) );
 
@@ -767,15 +812,15 @@ mod tests {
         assert_eq!( v, Err(3.3) );
 
         let v: Result< Result<i32, i32>, _ > = js_try!( return "f"; );
-        match v {
-            Err(ConversionError::TypeMismatch { actual_type: _ }) => (),
-            _ => panic!("Expected ConversionError::TypeMistmatch, got {:?}", v),
-        }
+        assert!( v.is_err() );
 
         let v: Result< Result<i32, i32>, _ > = js_try!( throw "Broken"; );
-        match v {
-            Err(ConversionError::TypeMismatch { actual_type: _ }) => (),
-            _ => panic!("Expected ConversionError::TypeMistmatch, got {:?}", v),
-        }
+        assert!( v.is_err() );
+    }
+
+    #[test]
+    fn js_try_from_value_to_value() {
+        let output: Result< Value, String > = js_try!( return null; ).unwrap();
+        assert_eq!( output, Ok( Value::Null ) );
     }
 }

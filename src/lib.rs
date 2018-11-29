@@ -111,11 +111,12 @@
     unused_qualifications
 )]
 #![cfg_attr(
-    all(target_arch = "wasm32", target_os = "unknown"),
-    feature(proc_macro)
+    all(test, rust_1_30_or_newer, rust_nightly),
+    feature(linkage) // Needed for async tests.
 )]
-#![cfg_attr(feature = "nightly", feature(core_intrinsics))]
+#![cfg_attr(rust_nightly, feature(core_intrinsics))]
 #![cfg_attr(feature = "nightly", feature(never_type))]
+#![cfg_attr(feature = "futures-support", feature(futures_api, pin, arbitrary_self_types))]
 #![recursion_limit="1500"]
 
 #[cfg(feature = "serde")]
@@ -129,17 +130,35 @@ extern crate serde_json;
 #[macro_use]
 extern crate serde_derive;
 
-#[cfg(all(target_arch = "wasm32", target_os = "unknown"))]
+#[cfg(rust_1_30_or_newer)]
 extern crate stdweb_internal_macros;
 
-#[cfg(all(target_arch = "wasm32", target_os = "unknown"))]
+#[cfg(all(
+    rust_1_30_or_newer,
+    target_arch = "wasm32",
+    target_os = "unknown"
+))]
 pub use stdweb_internal_macros::js_export;
 
-#[cfg(feature = "futures")]
-extern crate futures;
+#[cfg(rust_1_30_or_newer)]
+pub use stdweb_internal_macros::async_test;
+
+#[cfg(feature = "futures-support")]
+extern crate futures_core;
+
+#[cfg(feature = "futures-support")]
+extern crate futures_util;
+
+#[cfg(feature = "futures-support")]
+extern crate futures_channel;
+
+#[cfg(feature = "futures-support")]
+extern crate futures_executor;
 
 #[macro_use]
 extern crate stdweb_derive;
+#[macro_use]
+extern crate stdweb_internal_runtime;
 
 extern crate discard;
 
@@ -170,6 +189,7 @@ pub use webcore::array::Array;
 pub use webcore::symbol::Symbol;
 
 pub use webcore::unsafe_typed_array::UnsafeTypedArray;
+pub use webcore::mutfn::Mut;
 pub use webcore::once::Once;
 pub use webcore::instance_of::InstanceOf;
 pub use webcore::reference_type::ReferenceType;
@@ -178,13 +198,13 @@ pub use webcore::serialization::JsSerialize;
 pub use webcore::discard::DiscardOnDrop;
 
 #[cfg(feature = "experimental_features_which_may_break_on_minor_version_bumps")]
-pub use webcore::promise::{Promise, DoneHandle};
+pub use webcore::promise::{TypedPromise, Promise, DoneHandle};
 
 #[cfg(all(
-    feature = "futures",
+    feature = "futures-support",
     feature = "experimental_features_which_may_break_on_minor_version_bumps"
 ))]
-pub use webcore::promise_future::PromiseFuture;
+pub use webcore::promise_future::{PromiseFuture, spawn_local, print_error_panic, unwrap_future};
 
 #[cfg(feature = "serde")]
 /// A module with serde-related APIs.
@@ -197,6 +217,14 @@ pub mod serde {
 
 /// A module with bindings to the Web APIs.
 pub mod web {
+    #[cfg(feature = "futures-support")]
+    pub use webapi::timer_future::{
+        Wait,
+        wait,
+        IntervalBuffered,
+        interval_buffered
+    };
+
     pub use webapi::window::{
         Window,
         window
@@ -213,12 +241,14 @@ pub mod web {
     pub use webapi::date::Date;
     pub use webapi::event_target::{IEventTarget, EventTarget, EventListenerHandle};
     pub use webapi::window::RequestAnimationFrameHandle;
-    pub use webapi::node::{INode, Node, CloneKind};
+    pub use webapi::node::{INode, Node, CloneKind, NodeType};
     pub use webapi::element::{IElement, Element};
+    pub use webapi::document_fragment::DocumentFragment;
     pub use webapi::text_node::TextNode;
     pub use webapi::html_element::{IHtmlElement, HtmlElement, Rect};
     pub use webapi::window_or_worker::IWindowOrWorker;
     pub use webapi::parent_node::IParentNode;
+    pub use webapi::slotable::ISlotable;
     pub use webapi::non_element_parent_node::INonElementParentNode;
     pub use webapi::token_list::TokenList;
     pub use webapi::node_list::NodeList;
@@ -227,13 +257,20 @@ pub mod web {
     pub use webapi::location::Location;
     pub use webapi::array_buffer::ArrayBuffer;
     pub use webapi::typed_array::TypedArray;
-    pub use webapi::file_reader::{FileReader, FileReaderResult};
+    pub use webapi::file_reader::{FileReader, FileReaderResult, FileReaderReadyState};
+    pub use webapi::file_list::FileList;
     pub use webapi::history::History;
     pub use webapi::web_socket::{WebSocket, SocketCloseCode, SocketBinaryType, SocketReadyState};
     pub use webapi::rendering_context::{RenderingContext, CanvasRenderingContext2d, CanvasGradient, CanvasPattern, CanvasStyle, CompositeOperation, FillRule, ImageData, LineCap, LineJoin, Repetition, TextAlign, TextBaseline, TextMetrics};
     pub use webapi::mutation_observer::{MutationObserver, MutationObserverHandle, MutationObserverInit, MutationRecord};
-    pub use webapi::xml_http_request::{XmlHttpRequest, XhrReadyState};
+    pub use webapi::xml_http_request::{XmlHttpRequest, XhrReadyState, XhrResponseType};
     pub use webapi::blob::{IBlob, Blob};
+    pub use webapi::html_collection::HtmlCollection;
+    pub use webapi::child_node::IChildNode;
+    pub use webapi::gamepad::{Gamepad, GamepadButton, GamepadMappingType};
+    pub use webapi::selection::Selection;
+    pub use webapi::shadow_root::{ShadowRootMode, ShadowRoot};
+    pub use webapi::html_elements::SlotContentKind;
 
     /// A module containing error types.
     pub mod error {
@@ -248,11 +285,18 @@ pub mod web {
             NotSupportedError,
             SecurityError,
             SyntaxError,
-            TypeError,
-            InvalidCharacterError
+            InvalidCharacterError,
+            AbortError
         };
-        pub use webapi::error::{IError, Error};
+
+        pub use webapi::error::{
+            IError,
+            Error,
+            TypeError
+        };
+
         pub use webapi::rendering_context::{AddColorStopError, DrawImageError, GetImageDataError};
+        pub use webapi::html_elements::UnknownValueError;
     }
 
     /// A module containing HTML DOM elements.
@@ -261,6 +305,10 @@ pub mod web {
         pub use webapi::html_elements::InputElement;
         pub use webapi::html_elements::TextAreaElement;
         pub use webapi::html_elements::CanvasElement;
+        pub use webapi::html_elements::SelectElement;
+        pub use webapi::html_elements::OptionElement;
+        pub use webapi::html_elements::TemplateElement;
+        pub use webapi::html_elements::SlotElement;
     }
 
     /// A module containing JavaScript DOM events.
@@ -276,12 +324,18 @@ pub mod web {
         pub use webapi::events::mouse::{
             IMouseEvent,
             ClickEvent,
+            AuxClickEvent,
+            ContextMenuEvent,
             DoubleClickEvent,
             MouseDownEvent,
             MouseUpEvent,
             MouseMoveEvent,
             MouseOverEvent,
             MouseOutEvent,
+            MouseEnterEvent,
+            MouseLeaveEvent,
+            MouseWheelEvent,
+            MouseWheelDeltaMode,
             MouseButton
         };
 
@@ -297,6 +351,8 @@ pub mod web {
             PointerLeaveEvent,
             GotPointerCaptureEvent,
             LostPointerCaptureEvent,
+            PointerLockChangeEvent,
+            PointerLockErrorEvent
         };
 
         pub use webapi::events::keyboard::{
@@ -324,7 +380,8 @@ pub mod web {
             SocketCloseEvent,
             SocketErrorEvent,
             SocketOpenEvent,
-            SocketMessageEvent
+            SocketMessageEvent,
+            SocketMessageData
         };
 
         pub use webapi::events::history::{
@@ -338,14 +395,57 @@ pub mod web {
             ResourceAbortEvent,
             ResourceErrorEvent,
             ResizeEvent,
+            ScrollEvent,
             InputEvent,
-            ReadyStateChangeEvent
+            ReadyStateChangeEvent,
+            SubmitEvent,
+            SelectionChangeEvent
         };
 
         pub use webapi::events::focus::{
             IFocusEvent,
             FocusEvent,
             BlurEvent
+        };
+
+        pub use webapi::events::gamepad::{
+            IGamepadEvent,
+            GamepadConnectedEvent,
+            GamepadDisconnectedEvent,
+        };
+
+        pub use webapi::events::drag::{
+            IDragEvent,
+            DragRelatedEvent,
+            DragEvent,
+            DragStartEvent,
+            DragEndEvent,
+            DragEnterEvent,
+            DragLeaveEvent,
+            DragOverEvent,
+            DragExitEvent,
+            DragDropEvent,
+            DataTransfer,
+            EffectAllowed,
+            DropEffect,
+            DataTransferItemList,
+            DataTransferItem,
+            DataTransferItemKind,
+        };
+
+        pub use webapi::events::slot::SlotChangeEvent;
+    }
+
+    #[cfg(feature = "experimental_features_which_may_break_on_minor_version_bumps")]
+    /// APIs related to MIDI.
+    pub mod midi {
+        pub use webapi::midi::{
+            MidiOptions,
+            MidiAccess,
+            MidiPort,
+            MidiInput,
+            MidiOutput,
+            IMidiPort
         };
     }
 }
@@ -365,6 +465,7 @@ pub mod unstable {
 ///
 /// You should **only** import its contents through a wildcard, e.g.: `use stdweb::traits::*`.
 pub mod traits {
+    #[doc(hidden)]
     pub use super::web::{
         // Real interfaces.
         IEventTarget,
@@ -376,14 +477,18 @@ pub mod traits {
         // Mixins.
         IWindowOrWorker,
         IParentNode,
-        INonElementParentNode
+        INonElementParentNode,
+        IChildNode,
+        ISlotable,
     };
 
+    #[doc(hidden)]
     pub use super::web::error::{
         IDomException,
         IError
     };
 
+    #[doc(hidden)]
     pub use super::web::event::{
         IEvent,
         IUiEvent,
@@ -392,8 +497,13 @@ pub mod traits {
         IKeyboardEvent,
         IProgressEvent,
         IMessageEvent,
-        IFocusEvent
+        IFocusEvent,
+        IDragEvent,
     };
+
+    #[cfg(feature = "experimental_features_which_may_break_on_minor_version_bumps")]
+    #[doc(hidden)]
+    pub use super::web::midi::IMidiPort;
 }
 
 #[doc(hidden)]
@@ -402,7 +512,6 @@ pub mod private {
     pub use webcore::serialization::{
         JsSerialize,
         JsSerializeOwned,
-        PreallocatedArena,
         SerializedValue
     };
 
@@ -416,6 +525,9 @@ pub mod private {
         to_value,
         from_value
     };
+
+    pub use webcore::global_arena::ArenaRestorePoint;
+    pub use webcore::global_arena::serialize_value;
 
     // This is to prevent an unused_mut warnings in macros, because an `allow` doesn't work apparently?
     #[allow(dead_code)]

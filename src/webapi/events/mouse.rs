@@ -1,7 +1,7 @@
 use webcore::value::Reference;
 use webcore::try_from::TryInto;
 use webapi::event_target::EventTarget;
-use webapi::event::{IEvent, IUiEvent, UiEvent, Event, ConcreteEvent};
+use webapi::event::{IEvent, IUiEvent, UiEvent, Event};
 use webapi::events::keyboard::{ModifierKey, get_event_modifier_state};
 
 /// The `IMouseEvent` interface represents events that occur due to the user
@@ -69,6 +69,28 @@ pub trait IMouseEvent: IUiEvent {
     fn client_y( &self ) -> i32 {
         js!(
             return @{self.as_ref()}.clientY;
+        ).try_into().unwrap()
+    }
+
+    /// Returns the X position on the target element where this event occured.
+    ///
+    /// [(JavaScript docs)](https://developer.mozilla.org/en-US/docs/Web/API/MouseEvent/offsetX)
+    // https://drafts.csswg.org/cssom-view/#ref-for-dom-mouseevent-offsetx
+    #[inline]
+    fn offset_x( &self ) -> f64 {
+        js!(
+            return @{self.as_ref()}.offsetX;
+        ).try_into().unwrap()
+    }
+
+    /// Returns the Y position on the target element where this event occured.
+    ///
+    /// [(JavaScript docs)](https://developer.mozilla.org/en-US/docs/Web/API/MouseEvent/offsetY)
+    // https://drafts.csswg.org/cssom-view/#ref-for-dom-mouseevent-offsety
+    #[inline]
+    fn offset_y( &self ) -> f64 {
+        js!(
+            return @{self.as_ref()}.offsetY;
         ).try_into().unwrap()
     }
 
@@ -235,16 +257,44 @@ impl IMouseEvent for MouseEvent {}
 /// [(JavaScript docs)](https://developer.mozilla.org/en-US/docs/Web/Events/click)
 // https://w3c.github.io/uievents/#event-type-click
 #[derive(Clone, Debug, PartialEq, Eq, ReferenceType)]
-#[reference(instance_of = "MouseEvent")] // TODO: Better type check.
+#[reference(instance_of = "MouseEvent")]
+#[reference(event = "click")]
 #[reference(subclass_of(Event, UiEvent, MouseEvent))]
 pub struct ClickEvent( Reference );
 
 impl IEvent for ClickEvent {}
 impl IUiEvent for ClickEvent {}
 impl IMouseEvent for ClickEvent {}
-impl ConcreteEvent for ClickEvent {
-    const EVENT_TYPE: &'static str = "click";
-}
+
+/// The `AuxClickEvent` event is fired when a non-primary pointing device button
+/// (e.g. any non-left mouse button) has been pressed and released on an element.
+///
+/// [(JavaScript docs)](https://developer.mozilla.org/en-US/docs/Web/Events/auxclick)
+// https://w3c.github.io/uievents/#event-type-auxclick
+#[derive(Clone, Debug, PartialEq, Eq, ReferenceType)]
+#[reference(instance_of = "MouseEvent")]
+#[reference(event = "auxclick")]
+#[reference(subclass_of(Event, UiEvent, MouseEvent))]
+pub struct AuxClickEvent( Reference );
+
+impl IEvent for AuxClickEvent {}
+impl IUiEvent for AuxClickEvent {}
+impl IMouseEvent for AuxClickEvent {}
+
+/// The `ContextMenuEvent` event is fired when the right button of the mouse is clicked
+/// (before the context menu is displayed), or when the context menu key is pressed.
+///
+/// [(JavaScript docs)](https://developer.mozilla.org/en-US/docs/Web/Events/contextmenu)
+// https://html.spec.whatwg.org/#event-contextmenu
+#[derive(Clone, Debug, PartialEq, Eq, ReferenceType)]
+#[reference(instance_of = "MouseEvent")]
+#[reference(event = "contextmenu")]
+#[reference(subclass_of(Event, UiEvent, MouseEvent))]
+pub struct ContextMenuEvent( Reference );
+
+impl IEvent for ContextMenuEvent {}
+impl IUiEvent for ContextMenuEvent {}
+impl IMouseEvent for ContextMenuEvent {}
 
 /// The `DoubleClickEvent` is fired when a pointing device button
 /// (usually a mouse's primary button) is clicked twice on a single
@@ -253,16 +303,14 @@ impl ConcreteEvent for ClickEvent {
 /// [(JavaScript docs)](https://developer.mozilla.org/en-US/docs/Web/Events/dblclick)
 // https://w3c.github.io/uievents/#event-type-dblclick
 #[derive(Clone, Debug, PartialEq, Eq, ReferenceType)]
-#[reference(instance_of = "MouseEvent")] // TODO: Better type check.
+#[reference(instance_of = "MouseEvent")]
+#[reference(event = "dblclick")]
 #[reference(subclass_of(Event, UiEvent, MouseEvent))]
 pub struct DoubleClickEvent( Reference );
 
 impl IEvent for DoubleClickEvent {}
 impl IUiEvent for DoubleClickEvent {}
 impl IMouseEvent for DoubleClickEvent {}
-impl ConcreteEvent for DoubleClickEvent {
-    const EVENT_TYPE: &'static str = "dblclick";
-}
 
 /// The `MouseDownEvent` is fired when a pointing device button is pressed on
 /// an element.
@@ -270,16 +318,14 @@ impl ConcreteEvent for DoubleClickEvent {
 /// [(JavaScript docs)](https://developer.mozilla.org/en-US/docs/Web/Events/mousedown)
 // https://w3c.github.io/uievents/#event-type-mousedown
 #[derive(Clone, Debug, PartialEq, Eq, ReferenceType)]
-#[reference(instance_of = "MouseEvent")] // TODO: Better type check.
+#[reference(instance_of = "MouseEvent")]
+#[reference(event = "mousedown")]
 #[reference(subclass_of(Event, UiEvent, MouseEvent))]
 pub struct MouseDownEvent( Reference );
 
 impl IEvent for MouseDownEvent {}
 impl IUiEvent for MouseDownEvent {}
 impl IMouseEvent for MouseDownEvent {}
-impl ConcreteEvent for MouseDownEvent {
-    const EVENT_TYPE: &'static str = "mousedown";
-}
 
 /// The `MouseUpEvent` is fired when a pointing device button is released
 /// over an element.
@@ -287,16 +333,14 @@ impl ConcreteEvent for MouseDownEvent {
 /// [(JavaScript docs)](https://developer.mozilla.org/en-US/docs/Web/Events/mouseup)
 // https://w3c.github.io/uievents/#event-type-mouseup
 #[derive(Clone, Debug, PartialEq, Eq, ReferenceType)]
-#[reference(instance_of = "MouseEvent")] // TODO: Better type check.
+#[reference(instance_of = "MouseEvent")]
+#[reference(event = "mouseup")]
 #[reference(subclass_of(Event, UiEvent, MouseEvent))]
 pub struct MouseUpEvent( Reference );
 
 impl IEvent for MouseUpEvent {}
 impl IUiEvent for MouseUpEvent {}
 impl IMouseEvent for MouseUpEvent {}
-impl ConcreteEvent for MouseUpEvent {
-    const EVENT_TYPE: &'static str = "mouseup";
-}
 
 /// The `MouseMoveEvent` is fired when a pointing device (usually a mouse)
 /// is moved while over an element.
@@ -304,16 +348,14 @@ impl ConcreteEvent for MouseUpEvent {
 /// [(JavaScript docs)](https://developer.mozilla.org/en-US/docs/Web/Events/mousemove)
 // https://w3c.github.io/uievents/#event-type-mousemove
 #[derive(Clone, Debug, PartialEq, Eq, ReferenceType)]
-#[reference(instance_of = "MouseEvent")] // TODO: Better type check.
+#[reference(instance_of = "MouseEvent")]
+#[reference(event = "mousemove")]
 #[reference(subclass_of(Event, UiEvent, MouseEvent))]
 pub struct MouseMoveEvent( Reference );
 
 impl IEvent for MouseMoveEvent {}
 impl IUiEvent for MouseMoveEvent {}
 impl IMouseEvent for MouseMoveEvent {}
-impl ConcreteEvent for MouseMoveEvent {
-    const EVENT_TYPE: &'static str = "mousemove";
-}
 
 /// The `MouseOverEvent` is fired when a pointing device (usually a mouse)
 /// is moved onto the element that has the listener attached or onto one of its children.
@@ -321,16 +363,14 @@ impl ConcreteEvent for MouseMoveEvent {
 /// [(JavaScript docs)](https://developer.mozilla.org/en-US/docs/Web/Events/mouseover)
 // https://w3c.github.io/uievents/#event-type-mouseover
 #[derive(Clone, Debug, PartialEq, Eq, ReferenceType)]
-#[reference(instance_of = "MouseEvent")] // TODO: Better type check.
+#[reference(instance_of = "MouseEvent")]
+#[reference(event = "mouseover")]
 #[reference(subclass_of(Event, UiEvent, MouseEvent))]
 pub struct MouseOverEvent( Reference );
 
 impl IEvent for MouseOverEvent {}
 impl IUiEvent for MouseOverEvent {}
 impl IMouseEvent for MouseOverEvent {}
-impl ConcreteEvent for MouseOverEvent {
-    const EVENT_TYPE: &'static str = "mouseover";
-}
 
 /// The `MouseOutEvent` is fired when a pointing device (usually a mouse)
 /// is moved off the element that has the listener attached or off one of its children.
@@ -338,20 +378,128 @@ impl ConcreteEvent for MouseOverEvent {
 /// [(JavaScript docs)](https://developer.mozilla.org/en-US/docs/Web/Events/mouseout)
 // https://w3c.github.io/uievents/#event-type-mouseout
 #[derive(Clone, Debug, PartialEq, Eq, ReferenceType)]
-#[reference(instance_of = "MouseEvent")] // TODO: Better type check.
+#[reference(instance_of = "MouseEvent")]
+#[reference(event = "mouseout")]
 #[reference(subclass_of(Event, UiEvent, MouseEvent))]
 pub struct MouseOutEvent( Reference );
 
 impl IEvent for MouseOutEvent {}
 impl IUiEvent for MouseOutEvent {}
 impl IMouseEvent for MouseOutEvent {}
-impl ConcreteEvent for MouseOutEvent {
-    const EVENT_TYPE: &'static str = "mouseout";
+
+/// The `MouseEnterEvent` is fired when a pointing device (usually a mouse)
+/// is moved over the element that has the listener attached.
+///
+/// [(JavaScript docs)](https://developer.mozilla.org/en-US/docs/Web/Events/mouseenter)
+// https://w3c.github.io/uievents/#event-type-mouseenter
+#[derive(Clone, Debug, PartialEq, Eq, ReferenceType)]
+#[reference(instance_of = "MouseEvent")]
+#[reference(event = "mouseenter")]
+#[reference(subclass_of(Event, UiEvent, MouseEvent))]
+pub struct MouseEnterEvent( Reference );
+
+impl IEvent for MouseEnterEvent {}
+impl IUiEvent for MouseEnterEvent {}
+impl IMouseEvent for MouseEnterEvent {}
+
+/// The `MouseLeaveEvent` is fired when a pointing device (usually a mouse)
+/// is moved out of an element that has the listener attached to it.
+///
+/// [(JavaScript docs)](https://developer.mozilla.org/en-US/docs/Web/Events/mouseleave)
+// https://w3c.github.io/uievents/#event-type-mouseleave
+#[derive(Clone, Debug, PartialEq, Eq, ReferenceType)]
+#[reference(instance_of = "MouseEvent")]
+#[reference(event = "mouseleave")]
+#[reference(subclass_of(Event, UiEvent, MouseEvent))]
+pub struct MouseLeaveEvent( Reference );
+
+impl IEvent for MouseLeaveEvent {}
+impl IUiEvent for MouseLeaveEvent {}
+impl IMouseEvent for MouseLeaveEvent {}
+
+/// The `MouseWheelEvent` is fired when a pointing device's wheel button (usually a mousewheel)
+/// is rotated over the element that has the listener attached.
+///
+/// [(JavaScript docs)](https://developer.mozilla.org/en-US/docs/Web/Events/wheel)
+// https://w3c.github.io/uievents/#event-type-wheel
+#[derive(Clone, Debug, PartialEq, Eq, ReferenceType)]
+#[reference(instance_of = "MouseEvent")]
+#[reference(event = "wheel")]
+#[reference(subclass_of(Event, UiEvent, MouseEvent))]
+pub struct MouseWheelEvent( Reference );
+
+impl IEvent for MouseWheelEvent {}
+impl IUiEvent for MouseWheelEvent {}
+impl IMouseEvent for MouseWheelEvent {}
+
+impl MouseWheelEvent {
+    /// The change in X of the wheel
+    ///
+    /// [(Javascript docs)](https://developer.mozilla.org/en-US/docs/Web/API/WheelEvent/deltaX)
+    // https://w3c.github.io/uievents/#dom-wheelevent-deltax
+    pub fn delta_x(&self) -> f64 {
+        js! (
+            return @{self}.deltaX;
+        ).try_into().unwrap()
+    }
+
+    /// The change in Y of the wheel
+    ///
+    /// [(Javascript docs)](https://developer.mozilla.org/en-US/docs/Web/API/WheelEvent/deltaY)
+    // https://w3c.github.io/uievents/#dom-wheelevent-deltay
+    pub fn delta_y(&self) -> f64 {
+        js! (
+            return @{self}.deltaY;
+        ).try_into().unwrap()
+    }
+
+    /// The change in Z of the wheel
+    ///
+    /// [(Javascript docs)](https://developer.mozilla.org/en-US/docs/Web/API/WheelEvent/deltaZ)
+    // https://w3c.github.io/uievents/#dom-wheelevent-deltaz
+    pub fn delta_z(&self) -> f64 {
+        js! (
+            return @{self}.deltaZ;
+        ).try_into().unwrap()
+    }
+
+    /// The unit of measure of change
+    ///
+    /// [(JavaScript docs)](https://developer.mozilla.org/en-US/docs/Web/API/WheelEvent/deltaMode)
+    // https://w3c.github.io/uievents/#dom-wheelevent-deltamode
+    pub fn delta_mode(&self) -> MouseWheelDeltaMode {
+        let mode: u32 = js! (
+            return @{self}.deltaMode;
+        ).try_into().unwrap();
+        match mode {
+            0 => MouseWheelDeltaMode::Pixel,
+            1 => MouseWheelDeltaMode::Line,
+            2 => MouseWheelDeltaMode::Page,
+            _ => unreachable!()
+        }
+    }
+}
+
+/// What unit of measure the mouse wheel delta is in
+///
+/// [(JavaScipt docs)](https://developer.mozilla.org/en-US/docs/Web/API/WheelEvent/deltaMode)
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum MouseWheelDeltaMode {
+    /// The unit of measurement for the delta is pixels
+    // https://w3c.github.io/uievents/#dom-wheelevent-dom_delta_pixel
+    Pixel,
+    /// The unit of measurement for the delta is lines
+    // https://w3c.github.io/uievents/#dom-wheelevent-dom_delta_line
+    Line,
+     /// The unit of measurement for the delta is pages
+    // https://w3c.github.io/uievents/#dom-wheelevent-dom_delta_page
+    Page
 }
 
 #[cfg(all(test, feature = "web_test"))]
 mod tests {
     use super::*;
+    use webapi::event::ConcreteEvent;
 
     #[test]
     fn test_mouse_event() {
@@ -403,6 +551,23 @@ mod tests {
     }
 
     #[test]
+    fn test_aux_click_event() {
+        let event: AuxClickEvent = js!(
+            return new MouseEvent( @{AuxClickEvent::EVENT_TYPE} );
+        ).try_into()
+            .unwrap();
+        assert_eq!( event.event_type(), AuxClickEvent::EVENT_TYPE );
+    }
+
+    #[test]
+    fn test_context_menu_event() {
+        let event: ContextMenuEvent = js!(
+            return new MouseEvent( @{ContextMenuEvent::EVENT_TYPE} );
+        ).try_into().unwrap();
+        assert_eq!( event.event_type(), ContextMenuEvent::EVENT_TYPE );
+    }
+
+    #[test]
     fn test_double_click_event() {
         let event: DoubleClickEvent = js!(
             return new MouseEvent( @{DoubleClickEvent::EVENT_TYPE} );
@@ -448,5 +613,32 @@ mod tests {
             return new MouseEvent( @{MouseOutEvent::EVENT_TYPE} );
         ).try_into().unwrap();
         assert_eq!( event.event_type(), MouseOutEvent::EVENT_TYPE );
+    }
+
+    #[test]
+    fn test_mouse_enter_event() {
+        let event: MouseEnterEvent = js!(
+            return new MouseEvent( @{MouseEnterEvent::EVENT_TYPE} );
+        ).try_into()
+            .unwrap();
+        assert_eq!( event.event_type(), MouseEnterEvent::EVENT_TYPE );
+    }
+
+    #[test]
+    fn test_mouse_leave_event() {
+        let event: MouseLeaveEvent = js!(
+            return new MouseEvent( @{MouseLeaveEvent::EVENT_TYPE} );
+        ).try_into()
+            .unwrap();
+        assert_eq!( event.event_type(), MouseLeaveEvent::EVENT_TYPE );
+    }
+
+    #[test]
+    fn test_mouse_wheel_event() {
+        let event: MouseWheelEvent = js!(
+            return new MouseEvent( @{MouseWheelEvent::EVENT_TYPE} );
+        ).try_into()
+            .unwrap();
+        assert_eq!( event.event_type(), MouseWheelEvent::EVENT_TYPE );
     }
 }

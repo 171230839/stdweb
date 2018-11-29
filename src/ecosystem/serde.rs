@@ -19,8 +19,7 @@ use webcore::value::{
 
 use webcore::serialization::{
     JsSerialize,
-    SerializedValue,
-    PreallocatedArena
+    SerializedValue
 };
 
 use webcore::number::{self, Number, Storage, get_storage};
@@ -28,6 +27,7 @@ use webcore::try_from::{TryInto, TryFrom};
 use webcore::instance_of::InstanceOf;
 use webcore::array::Array;
 use webcore::object::Object;
+use webcore::global_arena;
 
 impl Serialize for Undefined {
     #[inline]
@@ -694,20 +694,43 @@ impl ser::SerializeStructVariant for SerializeStructVariant {
     }
 }
 
+macro_rules! number_deserializer {
+    ($([$name:ident $visitor:ident $type:ty])+) => {
+        $(
+            #[inline]
+            fn $name< V: Visitor< 'de > >( self, visitor: V ) -> Result< V::Value, Self::Error > {
+                let value: $type = self.try_into()?;
+                visitor.$visitor( value )
+            }
+        )+
+    };
+}
+
 impl< 'de > de::Deserializer< 'de > for Number {
     type Error = ConversionError;
 
     #[inline]
     fn deserialize_any< V: Visitor< 'de > >( self, visitor: V ) -> Result< V::Value, Self::Error > {
-        // TODO: Consider dispatching the visitor based on the actual value?
         match *get_storage( &self ) {
             number::Storage::I32( value ) => visitor.visit_i32( value ),
             number::Storage::F64( value ) => visitor.visit_f64( value )
         }
     }
 
+    number_deserializer! {
+        [deserialize_i8 visit_i8 i8]
+        [deserialize_i16 visit_i16 i16]
+        [deserialize_i32 visit_i32 i32]
+        [deserialize_i64 visit_i64 i64]
+        [deserialize_u8 visit_u8 u8]
+        [deserialize_u16 visit_u16 u16]
+        [deserialize_u32 visit_u32 u32]
+        [deserialize_u64 visit_u64 u64]
+        [deserialize_f64 visit_f64 f64]
+    }
+
     forward_to_deserialize_any! {
-        bool u8 u16 u32 u64 i8 i16 i32 i64 f32 f64 char str string unit option
+        bool f32 char str string unit option
         seq bytes byte_buf map unit_struct newtype_struct
         tuple_struct struct identifier tuple enum ignored_any
     }
@@ -732,6 +755,20 @@ impl Value {
             Value::Reference( _ ) => de::Unexpected::Other( "reference to a JavaScript value" )
         }
     }
+}
+
+macro_rules! value_proxy_number_deserializer {
+    ($($name:ident)+) => {
+        $(
+            #[inline]
+            fn $name< V: Visitor< 'de > >( self, visitor: V ) -> Result< V::Value, Self::Error > {
+                match self {
+                    Value::Number( value ) => value.$name( visitor ),
+                    value => value.deserialize_any( visitor )
+                }
+            }
+        )+
+    };
 }
 
 impl< 'de > de::Deserializer< 'de > for Value {
@@ -776,6 +813,19 @@ impl< 'de > de::Deserializer< 'de > for Value {
                 }
             }
         }
+    }
+
+    value_proxy_number_deserializer! {
+        deserialize_i8
+        deserialize_i16
+        deserialize_i32
+        deserialize_i64
+        deserialize_u8
+        deserialize_u16
+        deserialize_u32
+        deserialize_u64
+        deserialize_f32
+        deserialize_f64
     }
 
     #[inline]
@@ -830,7 +880,7 @@ impl< 'de > de::Deserializer< 'de > for Value {
     }
 
     forward_to_deserialize_any! {
-        bool u8 u16 u32 u64 i8 i16 i32 i64 f32 f64 char str string unit seq
+        bool char str string unit seq
         bytes byte_buf map unit_struct tuple_struct struct
         identifier tuple ignored_any
     }
@@ -1023,18 +1073,9 @@ macro_rules! __js_serializable_serde_boilerplate {
 
         impl< $($impl_arg),* > $crate::private::JsSerialize for $($kind_arg)* where $($bounds)* {
             #[inline]
-            fn _into_js< 'x >( &'x self, arena: &'x $crate::private::PreallocatedArena ) -> $crate::private::SerializedValue< 'x > {
+            fn _into_js< 'x >( &'x self ) -> $crate::private::SerializedValue< 'x > {
                 let value = $crate::private::to_value( self ).unwrap();
-                let value = arena.save( value );
-                $crate::private::JsSerialize::_into_js( value, arena )
-            }
-
-            #[inline]
-            fn _memory_required( &self ) -> usize {
-                // TODO: This is very inefficient. The actual conversion into
-                // the Value should be only done once.
-                let value = $crate::private::to_value( self ).unwrap();
-                $crate::private::JsSerialize::_memory_required( &value )
+                $crate::private::serialize_value( value )
             }
         }
 
@@ -1213,16 +1254,9 @@ impl< T: fmt::Debug > fmt::Debug for Serde< T > {
 
 impl< T: Serialize > JsSerialize for Serde< T > {
     #[inline]
-    fn _into_js< 'a >( &'a self, arena: &'a PreallocatedArena ) -> SerializedValue< 'a > {
+    fn _into_js< 'a >( &'a self ) -> SerializedValue< 'a > {
         let value = to_value( &self.0 ).unwrap();
-        let value = arena.save( value );
-        value._into_js( arena )
-    }
-
-    #[inline]
-    fn _memory_required( &self ) -> usize {
-        let value = to_value( &self.0 ).unwrap();
-        value._memory_required()
+        global_arena::serialize_value( value )
     }
 }
 
@@ -1255,6 +1289,17 @@ impl< 'de, T: Deserialize< 'de > > TryFrom< Value > for Serde< T > {
     #[inline]
     fn try_from( value: Value ) -> Result< Self, Self::Error > {
         Ok( Serde( from_value( value )? ) )
+    }
+}
+
+impl< 'de, T: Deserialize< 'de > > TryFrom< Value > for Option< Serde< T > > {
+    type Error = ConversionError;
+    #[inline]
+    fn try_from( value: Value ) -> Result< Self, Self::Error > {
+        match value {
+            Value::Undefined | Value::Null => Ok( None ),
+            value => value.try_into().map( Some )
+        }
     }
 }
 
@@ -1510,6 +1555,24 @@ mod tests {
     }
 
     #[test]
+    fn deserialization_into_option_through_newtype() {
+        let value = js! {
+            return {
+                number: 123,
+                string: "Hello!"
+            };
+        };
+
+        let structure: Option< Serde< Structure > > = value.try_into().unwrap();
+        let structure = structure.unwrap();
+        assert_eq!( structure.0.number, 123 );
+        assert_eq!( structure.0.string, "Hello!" );
+
+        let structure: Option< Serde< Structure > > = Value::Null.try_into().unwrap();
+        assert!( structure.is_none() );
+    }
+
+    #[test]
     fn serialization_and_deserialization_of_btreemap_with_serializable_values() {
         let mut original = BTreeMap::new();
         original.insert( "key", StructureSerializable {
@@ -1536,5 +1599,27 @@ mod tests {
 
         assert_eq!( original.len(), deserialized.len() );
         assert_eq!( original[ 0 ], deserialized[ 0 ] );
+    }
+
+    #[test]
+    fn deserialization_of_a_big_number() {
+        #[derive(Deserialize, Debug)]
+        struct Struct {
+            number: u64
+        }
+
+        let structure: Serde< Struct > = js!( return { number: 1535164942454 }; ).try_into().unwrap();
+        assert_eq!( structure.0.number, 1535164942454 );
+    }
+
+    #[test]
+    fn deserialization_of_a_very_big_number() {
+        #[derive(Deserialize, Debug)]
+        struct Struct {
+            number: u64
+        }
+
+        let structure: Serde< Struct > = js!( return { number: 9223372049167088120 }; ).try_into().unwrap();
+        assert_eq!( structure.0.number, 9223372049167087616 );
     }
 }

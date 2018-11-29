@@ -1,5 +1,5 @@
 use webcore::value::Reference;
-use webapi::event::{IEvent, IUiEvent, UiEvent, Event, ConcreteEvent};
+use webapi::event::{IEvent, IUiEvent, UiEvent, Event};
 
 /// The `ChangeEvent` is fired for input, select, and textarea
 /// elements when a change to the element's value is committed
@@ -9,14 +9,12 @@ use webapi::event::{IEvent, IUiEvent, UiEvent, Event, ConcreteEvent};
 /// [(JavaScript docs)](https://developer.mozilla.org/en-US/docs/Web/Events/change)
 // https://html.spec.whatwg.org/#event-change
 #[derive(Clone, Debug, PartialEq, Eq, ReferenceType)]
-#[reference(instance_of = "Event")] // TODO: Better type check.
+#[reference(instance_of = "Event")]
+#[reference(event = "change")]
 #[reference(subclass_of(Event))]
 pub struct ChangeEvent( Reference );
 
 impl IEvent for ChangeEvent {}
-impl ConcreteEvent for ChangeEvent {
-    const EVENT_TYPE: &'static str = "change";
-}
 
 /// The `InputEvent` is fired synchronously when the value of an
 /// input, select, or textarea element is changed. For input elements
@@ -29,44 +27,38 @@ impl ConcreteEvent for ChangeEvent {
 /// [(JavaScript docs)](https://developer.mozilla.org/en-US/docs/Web/Events/input)
 // https://html.spec.whatwg.org/#event-input
 #[derive(Clone, Debug, PartialEq, Eq, ReferenceType)]
-#[reference(instance_of = "Event")] // TODO: Better type check.
+#[reference(instance_of = "Event")]
+#[reference(event = "input")]
 #[reference(subclass_of(Event))]
 pub struct InputEvent( Reference );
 
 impl IEvent for InputEvent {}
-impl ConcreteEvent for InputEvent {
-    const EVENT_TYPE: &'static str = "input";
-}
 
 /// The `ResourceLoadEvent` is fired when a resource and its dependent resources have finished loading.
 ///
 /// [(JavaScript docs)](https://developer.mozilla.org/en-US/docs/Web/Events/load)
 // https://w3c.github.io/uievents/#load
 #[derive(Clone, Debug, PartialEq, Eq, ReferenceType)]
-#[reference(instance_of = "UIEvent")] // TODO: Better type check.
+#[reference(instance_of = "UIEvent")]
+#[reference(event = "load")]
 #[reference(subclass_of(Event, UiEvent))]
 pub struct ResourceLoadEvent( Reference );
 
 impl IEvent for ResourceLoadEvent {}
 impl IUiEvent for ResourceLoadEvent {}
-impl ConcreteEvent for ResourceLoadEvent {
-    const EVENT_TYPE: &'static str = "load";
-}
 
 /// The `ResourceAbortEvent` is fired when the loading of a resource has been aborted.
 ///
 /// [(JavaScript docs)](https://developer.mozilla.org/en-US/docs/Web/Events/abort)
 // https://w3c.github.io/uievents/#event-type-abort
 #[derive(Clone, Debug, PartialEq, Eq, ReferenceType)]
-#[reference(instance_of = "UIEvent")] // TODO: Better type check.
+#[reference(instance_of = "UIEvent")]
+#[reference(event = "abort")]
 #[reference(subclass_of(Event, UiEvent))]
 pub struct ResourceAbortEvent( Reference );
 
 impl IEvent for ResourceAbortEvent {}
 impl IUiEvent for ResourceAbortEvent {}
-impl ConcreteEvent for ResourceAbortEvent {
-    const EVENT_TYPE: &'static str = "abort";
-}
 
 /// The `ResourceErrorEvent` is fired when an error occurred; the exact circumstances vary,
 /// since this event is used from a variety of APIs.
@@ -74,15 +66,13 @@ impl ConcreteEvent for ResourceAbortEvent {
 /// [(JavaScript docs)](https://developer.mozilla.org/en-US/docs/Web/Events/error)
 // https://w3c.github.io/uievents/#event-type-error
 #[derive(Clone, Debug, PartialEq, Eq, ReferenceType)]
-#[reference(instance_of = "UIEvent")] // TODO: Better type check.
+#[reference(instance_of = "UIEvent")]
+#[reference(event = "error")]
 #[reference(subclass_of(Event, UiEvent))]
 pub struct ResourceErrorEvent( Reference );
 
 impl IEvent for ResourceErrorEvent {}
 impl IUiEvent for ResourceErrorEvent {}
-impl ConcreteEvent for ResourceErrorEvent {
-    const EVENT_TYPE: &'static str = "error";
-}
 
 /// The resize event is fired when the document view has been resized.
 ///
@@ -91,34 +81,67 @@ impl ConcreteEvent for ResourceErrorEvent {
 /// [(JavaScript docs)](https://developer.mozilla.org/en-US/docs/Web/Events/resize)
 // https://drafts.csswg.org/cssom-view/#eventdef-window-resize
 #[derive(Clone, Debug, PartialEq, Eq, ReferenceType)]
-#[reference(instance_of = "Event")] // TODO: Better type check.
+#[reference(instance_of = "Event")]
+#[reference(event = "resize")]
 #[reference(subclass_of(Event))]
 pub struct ResizeEvent( Reference );
 
 impl IEvent for ResizeEvent {}
-impl ConcreteEvent for ResizeEvent {
-    const EVENT_TYPE: &'static str = "resize";
-}
+
+/// The scroll event is fired when the document view or an element has been scrolled.
+///
+/// [(JavaScript docs)](https://developer.mozilla.org/en-US/docs/Web/Events/scroll)
+// https://drafts.csswg.org/cssom-view/#eventdef-document-scroll
+#[derive(Clone, Debug, PartialEq, Eq, ReferenceType)]
+#[reference(instance_of = "Event")]
+#[reference(event = "scroll")]
+#[reference(subclass_of(Event))]
+pub struct ScrollEvent( Reference );
+
+impl IEvent for ScrollEvent {}
 
 /// The readystatechange event is fired when the readyState attribute of a document has changed.
 ///
 /// [(JavaScript docs)](https://developer.mozilla.org/en-US/docs/Web/Events/readystatechange)
 // https://html.spec.whatwg.org/#event-readystatechange
 #[derive(Clone, Debug, PartialEq, Eq, ReferenceType)]
-#[reference(instance_of = "Event")] // TODO: Better type check.
+#[reference(instance_of = "Event")]
+#[reference(event = "readystatechange")]
 #[reference(subclass_of(Event))]
 pub struct ReadyStateChangeEvent( Reference );
 
 impl IEvent for ReadyStateChangeEvent {}
 
-impl ConcreteEvent for ReadyStateChangeEvent {
-    const EVENT_TYPE: &'static str = "readystatechange";
-}
+/// The submit event is fired when a form is submitted.
+///
+/// [(JavaScript docs)](https://developer.mozilla.org/en-US/docs/Web/Events/submit)
+// https://html.spec.whatwg.org/#event-submit
+#[derive(Clone, Debug, PartialEq, Eq, ReferenceType)]
+#[reference(instance_of = "Event")]
+#[reference(event = "submit")]
+#[reference(subclass_of(Event))]
+pub struct SubmitEvent( Reference );
+
+impl IEvent for SubmitEvent {}
+
+/// The selectionchange event of the Selection API is fired when the current text selection on a
+/// document is changed.
+///
+/// [(JavaScript docs)](https://developer.mozilla.org/en-US/docs/Web/Events/selectionchange)
+// https://w3c.github.io/selection-api/#selectionchange-event
+#[derive(Clone, Debug, PartialEq, Eq, ReferenceType)]
+#[reference(instance_of = "Event")]
+#[reference(event = "selectionchange")]
+#[reference(subclass_of(Event))]
+pub struct SelectionChangeEvent( Reference );
+
+impl IEvent for SelectionChangeEvent {}
 
 #[cfg(all(test, feature = "web_test"))]
 mod tests {
     use super::*;
     use webcore::try_from::TryInto;
+    use webapi::event::ConcreteEvent;
 
     #[test]
     fn test_change_event() {
@@ -153,10 +176,34 @@ mod tests {
     }
 
     #[test]
+    fn test_scroll_event() {
+        let event: ScrollEvent = js!(
+            return new Event( @{ScrollEvent::EVENT_TYPE} );
+        ).try_into().unwrap();
+        assert_eq!( event.event_type(), ScrollEvent::EVENT_TYPE );
+    }
+
+    #[test]
     fn test_ready_state_change_event() {
         let event: ReadyStateChangeEvent = js!(
             return new Event( @{ReadyStateChangeEvent::EVENT_TYPE} );
         ).try_into().unwrap();
         assert_eq!( event.event_type(), ReadyStateChangeEvent::EVENT_TYPE);
+    }
+
+    #[test]
+    fn test_submit_event() {
+        let event: SubmitEvent = js!(
+            return new Event( @{SubmitEvent::EVENT_TYPE} );
+        ).try_into().unwrap();
+        assert_eq!( event.event_type(), SubmitEvent::EVENT_TYPE);
+    }
+
+    #[test]
+    fn test_selectionchange_event() {
+        let event: SelectionChangeEvent = js!(
+            return new Event( @{SelectionChangeEvent::EVENT_TYPE} );
+        ).try_into().unwrap();
+        assert_eq!( event.event_type(), SelectionChangeEvent::EVENT_TYPE);
     }
 }

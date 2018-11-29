@@ -16,7 +16,8 @@ pub fn initialize() {
         INITIALIZED = true;
     }
 
-    include!( concat!( env!( "OUT_DIR" ), "/runtime.rs" ) );
+    #[cfg(not(feature = "docs-rs"))]
+    stdweb_internal_runtime_initialize!( __js_raw_asm );
 
     if cfg!( test ) == false {
         panic::set_hook( Box::new( |info| {

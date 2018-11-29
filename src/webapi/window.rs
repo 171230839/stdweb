@@ -5,6 +5,7 @@ use webapi::window_or_worker::IWindowOrWorker;
 use webapi::storage::Storage;
 use webapi::location::Location;
 use webapi::history::History;
+use webapi::selection::Selection;
 use webcore::once::Once;
 use webcore::value::Value;
 
@@ -189,5 +190,50 @@ impl Window {
         js!(
             return @{self}.outerHeight;
         ).try_into().unwrap()
+    }
+
+    /// The read-only Window property pageYOffset is an alias for scrollY; as such, it returns
+    /// the number of pixels the document is currently scrolled along the vertical axis (that is,
+    /// up or down), with a value of 0.0 indicating that the top edge of the Document is currently
+    /// aligned with the top edge of the window's content area.
+    ///
+    /// [(JavaScript docs)](https://developer.mozilla.org/en-US/docs/Web/API/Window/pageYOffset)
+    // https://drafts.csswg.org/cssom-view/#ref-for-dom-window-pageyoffset
+    pub fn page_y_offset(&self) -> f64 {
+        js!(
+            return @{self}.pageYOffset;
+        ).try_into().unwrap()
+    }
+
+    /// This is an alias for scrollX.
+    ///
+    /// [(JavaScript docs)](https://developer.mozilla.org/en-US/docs/Web/API/Window/pageXOffset)
+    // https://drafts.csswg.org/cssom-view/#ref-for-dom-window-pagexoffset
+    pub fn page_x_offset(&self) -> f64 {
+        js!(
+            return @{self}.pageXOffset;
+        ).try_into().unwrap()
+    }
+
+    /// The ratio in resolution from physical pixels to CSS pixels
+    ///
+    /// [(JavaScript docs)](https://developer.mozilla.org/en-US/docs/Web/API/Window/devicePixelRatio)
+    // https://drafts.csswg.org/cssom-view/#ref-for-dom-window-devicepixelratio
+    pub fn device_pixel_ratio(&self) -> f64 {
+        js! (
+            return @{self}.devicePixelRatio;
+        ).try_into().unwrap()
+    }
+
+    /// Returns a [Selection](struct.Selection.html) object representing the range of text selected
+    /// by the user or the current position of the caret.
+    /// [(Javascript docs)](https://developer.mozilla.org/en-US/docs/Web/API/Window/getSelection)
+    // https://w3c.github.io/selection-api/#dom-document-getselection
+    pub fn get_selection(&self) -> Option<Selection> {
+        unsafe {
+            js!(
+                return @{self}.getSelection();
+            ).into_reference_unchecked()
+        }
     }
 }

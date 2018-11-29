@@ -7,8 +7,6 @@
 // so **if** something fails then debugging it is going to be
 // a very miserable process.
 
-#![feature(proc_macro)]
-
 #[macro_use]
 extern crate stdweb;
 
